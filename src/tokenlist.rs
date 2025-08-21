@@ -608,7 +608,7 @@ impl PasswordGenerator {
     }
 
     fn arrange_anchored_tokens(&self, tokens: &[&Token]) -> Vec<Vec<String>> {
-        let mut arrangements: Vec<Vec<String>> = Vec::new();
+        let arrangements: Vec<Vec<String>> = Vec::new();
         
         // Separate anchored and non-anchored tokens
         let mut positional_tokens = HashMap::new();
