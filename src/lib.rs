@@ -13,7 +13,7 @@
 //! let generator = BtcRecoverTokenList::new(config);
 //!
 //! let token_content = "hello\nworld\ntest%d";
-//! let passwords = generator.generate_passwords_from_string(token_content)?;
+//! let passwords = generator.generate_from_string(token_content)?;
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
@@ -190,7 +190,7 @@ impl BtcRecoverTokenList {
 /// 
 /// # Example
 /// 
-/// ```rust
+/// ```rust,no_run
 /// use btcrecover_rust::generate_passwords_from_file;
 /// 
 /// let passwords = generate_passwords_from_file("tokens.txt")?;

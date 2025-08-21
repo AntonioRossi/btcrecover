@@ -1,0 +1,40 @@
+# Test tokenlist for performance benchmarking
+# This file contains various token types to test comprehensive functionality
+
+# Basic tokens
+hello
+world
+test
+password
+secret
+
+# Required tokens
++ bitcoin
++ wallet
+
+# Anchored tokens
+^beginning
+middle
+end$
+^2^second_position
+
+# Wildcard tokens
+pass%d
+test%2d
+word%a
+key%1,3d
+
+# Mutual exclusion groups
+cat dog bird
+red blue green yellow
+123 456 789
+
+# Complex combinations
+%dpass%a
+secure%2d%a
+crypto%[0-9]key
+
+# More tokens for larger combinations
+alpha beta gamma delta
+one two three four five
+quick brown fox jumps over lazy dog
