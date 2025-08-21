@@ -1,0 +1,28 @@
+[package]
+name = "btcrecover-rust"
+version = "0.1.0"
+edition = "2021"
+authors = ["BTCRecover Contributors"]
+description = "Rust implementation of BTCRecover token list password generation"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+regex = "1.10"
+itertools = "0.12"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.4", features = ["derive"] }
+thiserror = "1.0"
+rayon = "1.8"
+
+[dev-dependencies]
+criterion = "0.5"
+tempfile = "3.8"
+
+[lib]
+name = "btcrecover_rust"
+path = "src/lib.rs"
+
+[[bin]]
+name = "btcrecover-tokenlist"
+path = "src/main.rs"
