@@ -1,0 +1,4 @@
+# Test wildcards
+hello
+test%d
+pass%2d

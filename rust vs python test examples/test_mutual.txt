@@ -1,0 +1,4 @@
+# Test mutual exclusion
+hello
+cat dog bird
+red blue green yellow

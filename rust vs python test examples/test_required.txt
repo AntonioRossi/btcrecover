@@ -1,0 +1,5 @@
+# Test required tokens only
+hello
+world
++ bitcoin
++ wallet

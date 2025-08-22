@@ -1,0 +1,4 @@
+# Test complex combinations from benchmark
+%dpass%a
+secure%2d%a
+crypto%[0-9]key

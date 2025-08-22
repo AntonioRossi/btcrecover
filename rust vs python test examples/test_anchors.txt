@@ -1,0 +1,5 @@
+# Test anchored tokens
+^beginning
+middle
+end$
+^2^second_position
