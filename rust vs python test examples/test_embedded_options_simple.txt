@@ -1,0 +1,4 @@
+#--max-tokens 2 --min-tokens 1
+hello
+world
+test%d

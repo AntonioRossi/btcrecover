@@ -1,10 +1,10 @@
 use clap::{Arg, Command};
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{self, Write};
+use std::io::{self, Write, BufRead, BufReader};
 use std::time::Instant;
 
-use crate::{BtcRecoverTokenList, TokenListConfig, Result};
+use crate::{BtcRecoverTokenList, TokenListConfig, Result, BtcRecoverError};
 
 pub struct CliApp {
     generator: BtcRecoverTokenList,
@@ -18,9 +18,84 @@ impl CliApp {
     }
 
     pub fn run() -> Result<()> {
-        let matches = Self::build_cli().get_matches();
+        let args: Vec<String> = std::env::args().collect();
+        let matches = Self::parse_args_with_tokenlist_options(args)?;
         let mut app = Self::new();
         app.execute_command(matches)
+    }
+
+    /// Parse command-line arguments, checking for embedded options in token files
+    fn parse_args_with_tokenlist_options(mut args: Vec<String>) -> Result<clap::ArgMatches> {
+        // First, parse arguments to get the tokenlist file path
+        let initial_matches = Self::build_cli().try_get_matches_from(&args);
+        
+        if let Ok(matches) = initial_matches {
+            if let Some(tokenlist_path) = matches.get_one::<String>("tokenlist") {
+                // Check if the first line of the tokenlist file contains embedded options
+                if let Ok(embedded_options) = Self::extract_embedded_options(tokenlist_path) {
+                    if !embedded_options.is_empty() {
+                        eprintln!("Read additional options from tokenlist file: {}", embedded_options.join(" "));
+                        
+                        // Validate that forbidden options are not present
+                        Self::validate_embedded_options(&embedded_options)?;
+                        
+                        // Insert embedded options after the program name but before other args
+                        let mut new_args = vec![args[0].clone()];
+                        new_args.extend(embedded_options);
+                        new_args.extend_from_slice(&args[1..]);
+                        args = new_args;
+                    }
+                }
+            }
+        }
+        
+        // Parse with potentially modified arguments
+        Self::build_cli().try_get_matches_from(args)
+            .map_err(|e| BtcRecoverError::Config(format!("Command line parsing error: {}", e)))
+    }
+
+    /// Extract embedded command-line options from the first line of a token file
+    fn extract_embedded_options(tokenlist_path: &str) -> Result<Vec<String>> {
+        let file = File::open(tokenlist_path)?;
+        let mut reader = BufReader::new(file);
+        let mut first_line = String::new();
+        
+        if reader.read_line(&mut first_line)? > 0 {
+            let trimmed = first_line.trim();
+            if trimmed.starts_with("#--") {
+                // Remove the '#' and split into arguments
+                let options_str = &trimmed[1..];
+                // Simple split by whitespace - TODO: support quoting/escaping if needed
+                let options: Vec<String> = options_str.split_whitespace()
+                    .map(|s| s.to_string())
+                    .collect();
+                return Ok(options);
+            }
+        }
+        
+        Ok(Vec::new())
+    }
+
+    /// Validate that forbidden options are not present in embedded options
+    fn validate_embedded_options(options: &[String]) -> Result<()> {
+        for option in options {
+            if option.starts_with("--tokenlist") || option.starts_with("--to") {
+                return Err(BtcRecoverError::Config(
+                    "the --tokenlist option is not permitted inside a tokenlist file".to_string()
+                ));
+            }
+            if option.starts_with("--passwordlist") || option.starts_with("--pas") {
+                return Err(BtcRecoverError::Config(
+                    "the --passwordlist option is not permitted inside a tokenlist file".to_string()
+                ));
+            }
+            if option.starts_with("--performance") || option.starts_with("--pe") {
+                return Err(BtcRecoverError::Config(
+                    "the --performance option is not permitted inside a tokenlist file".to_string()
+                ));
+            }
+        }
+        Ok(())
     }
 
     fn build_cli() -> Command {
@@ -191,6 +266,43 @@ impl CliApp {
                     .help("Skip passwords longer than given length")
                     .value_parser(clap::value_parser!(usize))
                     .default_value("999999")
+            )
+            .arg(
+                Arg::new("autosave")
+                    .long("autosave")
+                    .value_name("FILE")
+                    .help("Autosave progress to file")
+            )
+            .arg(
+                Arg::new("pause")
+                    .long("pause")
+                    .help("Pause before exit")
+                    .action(clap::ArgAction::SetTrue)
+            )
+            .arg(
+                Arg::new("typos")
+                    .long("typos")
+                    .value_name("COUNT")
+                    .help("Number of typos to try")
+                    .value_parser(clap::value_parser!(usize))
+            )
+            .arg(
+                Arg::new("typos-case")
+                    .long("typos-case")
+                    .help("Try case typos")
+                    .action(clap::ArgAction::SetTrue)
+            )
+            .arg(
+                Arg::new("typos-swap")
+                    .long("typos-swap")
+                    .help("Try swapped character typos")
+                    .action(clap::ArgAction::SetTrue)
+            )
+            .arg(
+                Arg::new("typos-repeat")
+                    .long("typos-repeat")
+                    .help("Try repeated character typos")
+                    .action(clap::ArgAction::SetTrue)
             )
     }
 

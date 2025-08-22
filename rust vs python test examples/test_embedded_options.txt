@@ -1,0 +1,4 @@
+#--autosave progress.sav --pause --typos 1 --typos-case
+Cairo
+Beetlejuice Betelgeuse
+Hotel_california
