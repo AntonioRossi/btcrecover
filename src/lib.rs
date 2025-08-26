@@ -26,6 +26,13 @@ pub mod cli;
 pub mod tests;
 pub mod wildcards;
 
+// Performance optimization modules
+pub mod parallel_generator;
+pub mod async_parser;
+pub mod simd_wildcards;
+pub mod lockfree_structures;
+pub mod mmap_parser;
+
 pub use cli::CliApp;
 
 // Re-export core types for library users
